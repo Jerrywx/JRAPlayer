@@ -16,11 +16,13 @@
 @property (strong, nonatomic) AVPlayerItem		*playerItem;
 @property (nonatomic, strong) NSString			*urlString;
 
+@property (nonatomic, strong) NSString			*imageUrl;
+@property (nonatomic, strong) NSString			*assetUrl;
+
+
 - (instancetype)initWithFrame:(CGRect)frame
 						image:(NSString *)imageUrl
 						asset:(NSString *)assetUrl;
-
-- (instancetype)initWithImage:(NSString *)imageUrl;
 
 - (instancetype)initWithURL:(NSURL *)assetURL;
 

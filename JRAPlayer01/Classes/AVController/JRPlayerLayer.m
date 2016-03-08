@@ -26,9 +26,21 @@ static const NSString *PlayerItemStatusContext;
 						asset:(NSString *)assetUrl {
 
 	if (self = [super init]) {
-		self.frame = frame;
-		_asset = [AVAsset assetWithURL:[NSURL URLWithString:assetUrl]];
+		_imageUrl	= imageUrl;
+		_assetUrl	= assetUrl;
+		self.frame	= frame;
+		_asset		= [AVAsset assetWithURL:[NSURL URLWithString:assetUrl]];
+		self.backgroundColor = [UIColor blackColor];
 		[self setImage:imageUrl];
+	}
+	return self;
+}
+
+- (id)initWithURL:(NSURL *)assetURL {
+	
+	if (self = [super init]) {
+		_asset = [AVAsset assetWithURL:assetURL];
+		[self setView];
 	}
 	return self;
 }
@@ -49,34 +61,9 @@ static const NSString *PlayerItemStatusContext;
 	[self.appearBtn addTarget:self action:@selector(prepareToPlay) forControlEvents:UIControlEventTouchUpInside];
 }
 
-//- (instancetype)initWithImage:(NSString *)imageUrl;
-
-- (id)initWithURL:(NSURL *)assetURL {
-	
-	if (self = [super init]) {
-		_asset = [AVAsset assetWithURL:assetURL];
-//		[self prepareToPlay];
-		[self setView];
-	}
-	return self;
-}
-
 - (void)setUrlString:(NSString *)urlString {
 	_urlString = urlString;
 	_asset = [AVAsset assetWithURL:[NSURL URLWithString:urlString]];
-//	[self prepareToPlay];
-//	[self appear];
-//	[self setView];
-}
-
-- (void)appear {
-	
-	self.appearBtn = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 60, 60)];
-	[self.appearBtn setImage:[UIImage imageNamed:@"play"] forState:UIControlStateNormal];
-	[self addSubview:self.appearBtn];
-	[self.appearBtn addTarget:self action:@selector(prepareToPlay) forControlEvents:UIControlEventTouchUpInside];
-	
-	NSLog(@"===f: %@", NSStringFromCGRect(self.imageLayer.bounds));
 }
 
 - (void)prepareToPlay {
@@ -119,7 +106,12 @@ static const NSString *PlayerItemStatusContext;
 						change:(NSDictionary *)change
 					   context:(void *)context {
 	
-	NSLog(@"================== %@", change);
+	if ([change[@"kind"] isEqualToNumber:[NSNumber numberWithInteger:1]]) {
+		
+		if (self.imageLayer) {
+			[self.imageLayer removeFromSuperlayer];
+		}
+	}
 	[self updateControlView];
 }
 
@@ -134,7 +126,7 @@ static const NSString *PlayerItemStatusContext;
 	[self.playControl addTarget:self action:@selector(playCont) forControlEvents:UIControlEventTouchUpInside];
 	
 	// 2. 菊花
-	self.activity = [[UIActivityIndicatorView alloc] init];
+	self.activity = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 60, 60)];
 	[self addSubview:self.activity];
 	
 	//
@@ -145,15 +137,12 @@ static const NSString *PlayerItemStatusContext;
 
 	self.activity.hidden = YES;
 	self.playControl.hidden = YES;
+	
 	if (self.player.status != 1) {
 		self.activity.hidden = NO;
 		[self.activity startAnimating];
 	} else if (self.player.status == 1) {
-		
-		if (self.appearBtn) {
-			[self.appearBtn removeFromSuperview];
-		}
-		
+
 		if (self.player.rate == 0) {
 			self.playControl.hidden = NO;
 		} else {
@@ -171,6 +160,7 @@ static const NSString *PlayerItemStatusContext;
 }
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+	if (!self.player) return;
 	[self playCont];
 }
 
